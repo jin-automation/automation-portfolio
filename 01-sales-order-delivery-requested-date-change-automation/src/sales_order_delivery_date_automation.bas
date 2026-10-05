@@ -6,38 +6,29 @@ Option Explicit
 '
 ' Purpose:
 '   Automates high-volume requested delivery date changes in SAP sales orders
-'   using customer PO and line-item information maintained in Excel.
+'   using request information maintained in Excel.
 '
-' Business Context:
-'   Large reseller requests may contain more than 100 individual line items.
-'   Manually locating each sales order, navigating to the requested line item,
-'   validating the item, and changing the requested delivery date can require
-'   significant repetitive effort.
+' Excel Layout:
 '
-' Key Controls:
-'   - Searches SAP using the Customer PO number
-'   - Navigates to the specified sales order line item
-'   - Validates Material / Part Number before making any change
-'   - Validates Order Quantity before making any change
-'   - Updates the requested delivery date only after successful validation
-'   - Skips mismatched or incomplete records
-'   - Logs processing results and exceptions back to Excel
-'
-' Excel Input / Output:
-'
-'   Column B : Customer PO Number
+'   INPUT - Request Data
+'   Column B : Customer PO
 '   Column C : Line Item
-'   Column D : Expected Material / Part Number
-'   Column E : Expected Quantity
+'   Column D : Material / Part Number
+'   Column E : Quantity
 '   Column F : Requested Delivery Date
-'   Column G : Material / Quantity Match (Yes / No)
-'   Column H : Processing Status
-'   Column I : SAP Material (log)
-'   Column J : SAP Quantity - Raw Value (log)
-'   Column K : SAP Material - Normalized (log)
-'   Column L : Excel Material - Normalized (log)
-'   Column M : SAP Quantity - Numeric (log)
-'   Column N : Excel Quantity - Numeric (log)
+'
+'   AUTOMATION OUTPUT - SAP Validation & Results
+'   Column H : SAP Sales Order (Found)
+'   Column I : SAP Material / Part Number
+'   Column J : SAP Quantity
+'   Column K : Validation
+'   Column L : Status
+'
+' Key Control:
+'   Validate first, update second.
+'
+'   The requested delivery date is updated only when both the Material Number
+'   and Order Quantity retrieved from SAP match the expected Excel values.
 '
 ' Technology:
 '   SAP ERP / ECC
@@ -46,9 +37,8 @@ Option Explicit
 '   VBA
 '
 ' Portfolio Note:
-'   This is a sanitized portfolio version.
-'   No customer-specific, order-specific, pricing, or production data is
-'   included in this source code.
+'   This is a sanitized portfolio version. No customer-specific, order-specific,
+'   pricing, system, user, or production data is included.
 '
 ' =============================================================================
 
@@ -67,10 +57,10 @@ Public Sub UpdateRequestedDeliveryDates()
     Dim customerPO As String
     Dim lineItem As String
     Dim expectedMaterial As String
-    Dim requestedDate As String
     Dim expectedQty As Double
+    Dim requestedDate As String
 
-    Dim itemOverviewId As String
+    Dim sapSalesOrder As String
     Dim sapMaterial As String
     Dim sapQtyRaw As String
     Dim sapQty As Double
@@ -81,15 +71,15 @@ Public Sub UpdateRequestedDeliveryDates()
     Dim materialMatches As Boolean
     Dim quantityMatches As Boolean
 
+    Dim itemOverviewId As String
     Dim requestedDateCellId As String
 
 
     ' -------------------------------------------------------------------------
     ' SAP Item Overview table
     '
-    ' Note:
-    ' SAP GUI element IDs can vary depending on SAP version, configuration,
-    ' screen layout, and organizational environment.
+    ' SAP GUI element IDs may vary depending on SAP version, configuration,
+    ' screen layout and organizational environment.
     ' -------------------------------------------------------------------------
 
     itemOverviewId = _
@@ -100,7 +90,7 @@ Public Sub UpdateRequestedDeliveryDates()
 
 
     ' -------------------------------------------------------------------------
-    ' Connect to an active SAP GUI session
+    ' Connect to active SAP GUI session
     ' -------------------------------------------------------------------------
 
     On Error GoTo SAPConnectionError
@@ -114,7 +104,7 @@ Public Sub UpdateRequestedDeliveryDates()
 
 
     ' -------------------------------------------------------------------------
-    ' Identify the Excel worksheet and processing range
+    ' Excel worksheet
     ' -------------------------------------------------------------------------
 
     Set ws = ThisWorkbook.Sheets(1)
@@ -123,7 +113,7 @@ Public Sub UpdateRequestedDeliveryDates()
 
 
     ' -------------------------------------------------------------------------
-    ' Process each Excel request
+    ' Process each request
     ' -------------------------------------------------------------------------
 
     For currentRow = 2 To lastRow
@@ -140,7 +130,11 @@ Public Sub UpdateRequestedDeliveryDates()
         expectedQty = 0
 
         If ws.Cells(currentRow, "E").Value <> "" Then
-            expectedQty = CDbl(ws.Cells(currentRow, "E").Value)
+
+            If IsNumeric(ws.Cells(currentRow, "E").Value) Then
+                expectedQty = CDbl(ws.Cells(currentRow, "E").Value)
+            End If
+
         End If
 
 
@@ -148,25 +142,34 @@ Public Sub UpdateRequestedDeliveryDates()
         ' Read requested delivery date
         ' ---------------------------------------------------------------------
 
-        If ws.Cells(currentRow, "F").Value <> "" Then
-            requestedDate = Format(ws.Cells(currentRow, "F").Value, "dd.MM.yyyy")
+        If ws.Cells(currentRow, "F").Value <> "" _
+            And IsDate(ws.Cells(currentRow, "F").Value) Then
+
+            requestedDate = _
+                Format(ws.Cells(currentRow, "F").Value, "dd.MM.yyyy")
+
         Else
+
             requestedDate = ""
+
         End If
 
 
         ' ---------------------------------------------------------------------
-        ' Clear previous processing results
+        ' Clear previous automation output
+        '
+        ' H = SAP Sales Order
+        ' I = SAP Material
+        ' J = SAP Qty
+        ' K = Validation
+        ' L = Status
         ' ---------------------------------------------------------------------
 
-        ws.Cells(currentRow, "G").Value = ""
         ws.Cells(currentRow, "H").Value = ""
         ws.Cells(currentRow, "I").Value = ""
         ws.Cells(currentRow, "J").Value = ""
         ws.Cells(currentRow, "K").Value = ""
         ws.Cells(currentRow, "L").Value = ""
-        ws.Cells(currentRow, "M").Value = ""
-        ws.Cells(currentRow, "N").Value = ""
 
 
         ' ---------------------------------------------------------------------
@@ -178,21 +181,32 @@ Public Sub UpdateRequestedDeliveryDates()
             Or expectedMaterial = "" _
             Or ws.Cells(currentRow, "E").Value = "" Then
 
-            ws.Cells(currentRow, "H").Value = "SKIP: Missing data"
+            ws.Cells(currentRow, "K").Value = "Not Processed"
+            ws.Cells(currentRow, "L").Value = "SKIP: Missing data"
 
             GoTo NextRequest
 
         End If
 
 
-        ws.Cells(currentRow, "H").Value = "RUNNING..."
+        If requestedDate = "" Then
+
+            ws.Cells(currentRow, "K").Value = "Not Processed"
+            ws.Cells(currentRow, "L").Value = "SKIP: Invalid date"
+
+            GoTo NextRequest
+
+        End If
+
+
+        ws.Cells(currentRow, "L").Value = "RUNNING..."
 
         On Error GoTo RequestError
 
 
         ' =====================================================================
         ' STEP 1
-        ' Open SAP VA02 and locate the sales order using Customer PO
+        ' Open VA02 and search using Customer PO
         ' =====================================================================
 
         With SapSession
@@ -204,7 +218,9 @@ Public Sub UpdateRequestedDeliveryDates()
             .findById("wnd[0]/usr/btnBT_SUCH").Press
 
 
-            ' Handle optional SAP confirmation / selection dialogs.
+            ' -----------------------------------------------------------------
+            ' Handle optional SAP confirmation / selection dialogs
+            ' -----------------------------------------------------------------
 
             On Error Resume Next
 
@@ -213,10 +229,24 @@ Public Sub UpdateRequestedDeliveryDates()
 
             On Error GoTo RequestError
 
+            DoEvents
+
+            Application.Wait Now + TimeValue("0:00:01")
+
 
             ' =================================================================
             ' STEP 2
-            ' Navigate to the requested line item
+            ' Capture the Sales Order found by SAP
+            ' =================================================================
+
+            sapSalesOrder = GetCurrentSalesOrder(SapSession)
+
+            ws.Cells(currentRow, "H").Value = sapSalesOrder
+
+
+            ' =================================================================
+            ' STEP 3
+            ' Navigate to requested line item
             ' =================================================================
 
             .findById( _
@@ -243,105 +273,102 @@ Public Sub UpdateRequestedDeliveryDates()
 
 
             ' =================================================================
-            ' STEP 3
-            ' Read Material Number and Order Quantity from SAP
+            ' STEP 4
+            ' Read SAP Material Number and Order Quantity
             ' =================================================================
 
-            sapMaterial = GetTopRowMaterial(.findById(itemOverviewId))
+            sapMaterial = _
+                GetTopRowMaterial(.findById(itemOverviewId))
 
-            sapQtyRaw = GetTopRowQuantity(.findById(itemOverviewId))
+            sapQtyRaw = _
+                GetTopRowQuantity(.findById(itemOverviewId))
 
-            sapQty = NormalizeQuantityToDouble(sapQtyRaw)
+            sapQty = _
+                NormalizeQuantityToDouble(sapQtyRaw)
 
         End With
 
 
         ' ---------------------------------------------------------------------
-        ' Record SAP values for audit / troubleshooting
+        ' Record SAP values in Automation Output
         ' ---------------------------------------------------------------------
 
         ws.Cells(currentRow, "I").Value = sapMaterial
-        ws.Cells(currentRow, "J").Value = sapQtyRaw
-        ws.Cells(currentRow, "M").Value = sapQty
-        ws.Cells(currentRow, "N").Value = expectedQty
+        ws.Cells(currentRow, "J").Value = sapQty
 
 
         ' =====================================================================
-        ' STEP 4
+        ' STEP 5
         ' Validate Material Number and Quantity
         ' =====================================================================
 
-        normalizedSapMaterial = NormalizeMaterialNumber(sapMaterial)
+        normalizedSapMaterial = _
+            NormalizeMaterialNumber(sapMaterial)
 
         normalizedExcelMaterial = _
             NormalizeMaterialNumber(expectedMaterial)
 
 
-        ws.Cells(currentRow, "K").Value = normalizedSapMaterial
-
-        ws.Cells(currentRow, "L").Value = _
-            normalizedExcelMaterial
-
-
+        ' ---------------------------------------------------------------------
+        ' Material comparison
+        '
         ' SAP may display leading zeros for some material numbers.
-        ' The normalized values are therefore compared after removing
-        ' leading zeros and spaces.
+        ' Values are normalized before comparison.
+        ' ---------------------------------------------------------------------
 
         materialMatches = _
-            (InStr( _
-                1, _
+            (StrComp( _
                 normalizedSapMaterial, _
                 normalizedExcelMaterial, _
                 vbTextCompare _
-            ) > 0) _
-            Or _
-            (InStr( _
-                1, _
-                normalizedExcelMaterial, _
-                normalizedSapMaterial, _
-                vbTextCompare _
-            ) > 0)
+            ) = 0)
 
 
-        ' Quantity is compared numerically.
+        ' ---------------------------------------------------------------------
+        ' Quantity comparison
+        ' ---------------------------------------------------------------------
 
         quantityMatches = _
             (Abs(sapQty - expectedQty) < 0.0001)
 
 
-        ' ---------------------------------------------------------------------
-        ' Stop processing if validation fails
-        ' ---------------------------------------------------------------------
+        ' =====================================================================
+        ' STEP 6
+        ' Validation decision
+        ' =====================================================================
 
         If materialMatches And quantityMatches Then
 
-            ws.Cells(currentRow, "G").Value = "Yes"
+            ws.Cells(currentRow, "K").Value = "Match"
 
         Else
 
-            ws.Cells(currentRow, "G").Value = "No"
+            ws.Cells(currentRow, "K").Value = "Mismatch"
 
 
             If Not materialMatches And Not quantityMatches Then
 
-                ws.Cells(currentRow, "H").Value = _
+                ws.Cells(currentRow, "L").Value = _
                     "MISMATCH: PN & Qty"
 
             ElseIf Not materialMatches Then
 
-                ws.Cells(currentRow, "H").Value = _
+                ws.Cells(currentRow, "L").Value = _
                     "MISMATCH: PN"
 
             ElseIf Not quantityMatches Then
 
-                ws.Cells(currentRow, "H").Value = _
+                ws.Cells(currentRow, "L").Value = _
                     "MISMATCH: Qty"
 
             End If
 
 
-            ' Safety control:
+            ' -----------------------------------------------------------------
+            ' SAFETY CONTROL
+            '
             ' Never update SAP when Material or Quantity validation fails.
+            ' -----------------------------------------------------------------
 
             GoTo NextRequest
 
@@ -349,18 +376,9 @@ Public Sub UpdateRequestedDeliveryDates()
 
 
         ' =====================================================================
-        ' STEP 5
-        ' Update the requested delivery date
+        ' STEP 7
+        ' Update requested delivery date
         ' =====================================================================
-
-        If requestedDate = "" Then
-
-            ws.Cells(currentRow, "H").Value = "NO DATE"
-
-            GoTo NextRequest
-
-        End If
-
 
         On Error Resume Next
 
@@ -375,7 +393,7 @@ Public Sub UpdateRequestedDeliveryDates()
 
         If Err.Number <> 0 Then
 
-            ws.Cells(currentRow, "H").Value = _
+            ws.Cells(currentRow, "L").Value = _
                 "DATE WRITE FAIL: " & Err.Description
 
             Err.Clear
@@ -391,14 +409,16 @@ Public Sub UpdateRequestedDeliveryDates()
 
 
         ' =====================================================================
-        ' STEP 6
-        ' Save the SAP Sales Order
+        ' STEP 8
+        ' Save Sales Order
         ' =====================================================================
 
         SapSession.findById("wnd[0]").sendVKey 11
 
 
-        ' Handle optional SAP confirmation dialog.
+        ' ---------------------------------------------------------------------
+        ' Handle optional SAP confirmation dialog
+        ' ---------------------------------------------------------------------
 
         On Error Resume Next
 
@@ -408,10 +428,10 @@ Public Sub UpdateRequestedDeliveryDates()
 
 
         ' ---------------------------------------------------------------------
-        ' Record successful processing
+        ' Successful processing
         ' ---------------------------------------------------------------------
 
-        ws.Cells(currentRow, "H").Value = "OK"
+        ws.Cells(currentRow, "L").Value = "OK"
 
         GoTo NextRequest
 
@@ -422,10 +442,12 @@ Public Sub UpdateRequestedDeliveryDates()
 
 RequestError:
 
-        ws.Cells(currentRow, "H").Value = _
+        ws.Cells(currentRow, "L").Value = _
             "ERROR: " & Err.Description
 
-        ws.Cells(currentRow, "G").Value = "No"
+        If ws.Cells(currentRow, "K").Value = "" Then
+            ws.Cells(currentRow, "K").Value = "Error"
+        End If
 
         Err.Clear
 
@@ -460,12 +482,120 @@ End Sub
 
 ' =============================================================================
 ' Helper Function:
-' Read Material Number from the first visible row of SAP Item Overview
+' Retrieve the currently opened SAP Sales Order number
+'
+' IMPORTANT:
+' SAP GUI element IDs may differ by system configuration.
+' The function safely attempts several commonly encountered field IDs.
+'
+' If none of these IDs match the SAP environment, the function returns
+' "(Found in SAP)" rather than generating a false Sales Order number.
 ' =============================================================================
 
-Private Function GetTopRowMaterial(ByVal grid As Object) As String
+Private Function GetCurrentSalesOrder( _
+    ByVal SapSession As Object _
+) As String
+
+    Dim salesOrderNumber As String
+
+
+    On Error Resume Next
+
+
+    ' -------------------------------------------------------------------------
+    ' Candidate 1
+    ' Common VA02 Sales Order field
+    ' -------------------------------------------------------------------------
+
+    salesOrderNumber = _
+        SapSession.findById( _
+            "wnd[0]/usr/ctxtVBAK-VBELN" _
+        ).Text
+
+
+    ' -------------------------------------------------------------------------
+    ' Candidate 2
+    ' Alternative VA02 screen structure
+    ' -------------------------------------------------------------------------
+
+    If Err.Number <> 0 Or Trim(salesOrderNumber) = "" Then
+
+        Err.Clear
+
+        salesOrderNumber = _
+            SapSession.findById( _
+                "wnd[0]/usr/txtVBAK-VBELN" _
+            ).Text
+
+    End If
+
+
+    ' -------------------------------------------------------------------------
+    ' Candidate 3
+    ' Alternative sales document field
+    ' -------------------------------------------------------------------------
+
+    If Err.Number <> 0 Or Trim(salesOrderNumber) = "" Then
+
+        Err.Clear
+
+        salesOrderNumber = _
+            SapSession.findById( _
+                "wnd[0]/usr/ctxtRV45A-VBELN" _
+            ).Text
+
+    End If
+
+
+    ' -------------------------------------------------------------------------
+    ' Candidate 4
+    ' Alternative text field
+    ' -------------------------------------------------------------------------
+
+    If Err.Number <> 0 Or Trim(salesOrderNumber) = "" Then
+
+        Err.Clear
+
+        salesOrderNumber = _
+            SapSession.findById( _
+                "wnd[0]/usr/txtRV45A-VBELN" _
+            ).Text
+
+    End If
+
+
+    On Error GoTo 0
+
+
+    salesOrderNumber = Trim(salesOrderNumber)
+
+
+    If salesOrderNumber = "" Then
+
+        ' Do not invent a Sales Order number.
+        ' SAP field IDs differ between environments.
+
+        salesOrderNumber = "(Found in SAP)"
+
+    End If
+
+
+    GetCurrentSalesOrder = salesOrderNumber
+
+End Function
+
+
+' =============================================================================
+' Helper Function:
+' Read Material Number from first visible row of SAP Item Overview
+' =============================================================================
+
+Private Function GetTopRowMaterial( _
+    ByVal grid As Object _
+) As String
 
     Dim valueText As String
+
 
     On Error Resume Next
 
@@ -510,12 +640,15 @@ End Function
 
 ' =============================================================================
 ' Helper Function:
-' Read Order Quantity from the first visible row of SAP Item Overview
+' Read Order Quantity from first visible row of SAP Item Overview
 ' =============================================================================
 
-Private Function GetTopRowQuantity(ByVal grid As Object) As String
+Private Function GetTopRowQuantity( _
+    ByVal grid As Object _
+) As String
 
     Dim valueText As String
+
 
     On Error Resume Next
 
@@ -560,10 +693,12 @@ End Function
 
 ' =============================================================================
 ' Helper Function:
-' Normalize Material / Part Number for comparison
+' Normalize Material / Part Number
 ' =============================================================================
 
-Private Function NormalizeMaterialNumber(ByVal value As String) As String
+Private Function NormalizeMaterialNumber( _
+    ByVal value As String _
+) As String
 
     Dim normalizedValue As String
 
@@ -571,20 +706,23 @@ Private Function NormalizeMaterialNumber(ByVal value As String) As String
     normalizedValue = _
         Application.WorksheetFunction.Clean(CStr(value))
 
-
     normalizedValue = Trim(normalizedValue)
 
-    normalizedValue = Replace(normalizedValue, " ", "")
+    normalizedValue = _
+        Replace(normalizedValue, " ", "")
 
 
-    ' SAP may display leading zeros for material numbers.
-    ' Remove them before comparison.
+    ' -------------------------------------------------------------------------
+    ' SAP may display leading zeros for Material Numbers.
+    ' Remove leading zeros before comparison.
+    ' -------------------------------------------------------------------------
 
     Do While _
-        Left$(normalizedValue, 1) = "0" _
-        And Len(normalizedValue) > 1
+        Len(normalizedValue) > 1 _
+        And Left$(normalizedValue, 1) = "0"
 
-        normalizedValue = Mid$(normalizedValue, 2)
+        normalizedValue = _
+            Mid$(normalizedValue, 2)
 
     Loop
 
@@ -596,7 +734,7 @@ End Function
 
 ' =============================================================================
 ' Helper Function:
-' Convert SAP quantity text into a numeric Double value
+' Convert SAP quantity text into numeric Double
 ' =============================================================================
 
 Private Function NormalizeQuantityToDouble( _
@@ -604,24 +742,21 @@ Private Function NormalizeQuantityToDouble( _
 ) As Double
 
     Dim decimalSeparator As String
-
     Dim i As Long
-
     Dim currentCharacter As String
-
     Dim numericValue As String
 
 
     decimalSeparator = _
         Application.International(xlDecimalSeparator)
 
-
     value = CStr(value)
 
 
     For i = 1 To Len(value)
 
-        currentCharacter = Mid$(value, i, 1)
+        currentCharacter = _
+            Mid$(value, i, 1)
 
 
         If currentCharacter >= "0" _
@@ -655,7 +790,8 @@ Private Function NormalizeQuantityToDouble( _
 
     Else
 
-        NormalizeQuantityToDouble = CDbl(numericValue)
+        NormalizeQuantityToDouble = _
+            CDbl(numericValue)
 
     End If
 
