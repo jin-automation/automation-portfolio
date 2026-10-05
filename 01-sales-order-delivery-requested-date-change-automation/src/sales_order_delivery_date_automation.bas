@@ -9,16 +9,16 @@ Option Explicit
 ' Automates high-volume requested delivery date changes in SAP ERP/ECC
 ' using Excel VBA and SAP GUI Scripting.
 '
-' The automation:
-'   1. Reads request data from Excel
-'   2. Searches SAP using the Customer PO
-'   3. Navigates to the requested Sales Order line item
-'   4. Reads the SAP Material Number and Order Quantity
-'   5. Validates both values against the Excel request
-'   6. Updates the requested delivery date only when validation succeeds
-'   7. Saves the Sales Order
-'   8. Records the validation result and processing status in Excel
-'
+' WORKFLOW
+' --------
+' 1. Read request data from Excel.
+' 2. Search SAP using the Customer PO.
+' 3. Navigate to the requested Sales Order line item.
+' 4. Read SAP Material Number and Order Quantity.
+' 5. Validate Material Number and Quantity against the Excel request.
+' 6. Update the requested delivery date only when validation succeeds.
+' 7. Save the Sales Order.
+' 8. Record SAP validation results in Excel.
 '
 ' EXCEL DEMO LAYOUT
 ' -----------------
@@ -41,28 +41,27 @@ Option Explicit
 '   K : Validation
 '   L : Status
 '
-' Row 4 is the first data row in the public demonstration workbook.
-'
+' Row 4 is the first data row.
 '
 ' KEY SAFETY CONTROL
 ' ------------------
 '
 '   VALIDATE FIRST, UPDATE SECOND.
 '
-' The requested delivery date is changed only when both the SAP Material
-' Number and Order Quantity match the expected values in Excel.
+' The requested delivery date is changed only when both:
 '
-' If either validation fails, the SAP update is skipped and the exception
-' is logged for manual review.
+'   - SAP Material Number matches the expected Material Number
+'   - SAP Order Quantity matches the expected Quantity
 '
+' If either validation fails, the SAP update is skipped.
 '
 ' PORTFOLIO NOTE
 ' --------------
 '
 ' This is a sanitized portfolio version.
 '
-' Company-specific, customer-specific, order-specific, pricing and
-' production information has been removed or generalized.
+' Company-specific, customer-specific, order-specific, pricing,
+' user and production information has been removed or generalized.
 '
 ' SAP GUI element IDs may vary between SAP environments.
 '
@@ -163,44 +162,6 @@ Public Sub UpdateRequestedDeliveryDates()
 
 
         ' ---------------------------------------------------------------------
-        ' Read expected quantity
-        ' ---------------------------------------------------------------------
-
-        expectedQty = 0
-
-        If ws.Cells(currentRow, "E").Value <> "" Then
-
-            If IsNumeric(ws.Cells(currentRow, "E").Value) Then
-
-                expectedQty = _
-                    CDbl(ws.Cells(currentRow, "E").Value)
-
-            End If
-
-        End If
-
-
-        ' ---------------------------------------------------------------------
-        ' Read requested delivery date
-        ' ---------------------------------------------------------------------
-
-        If ws.Cells(currentRow, "F").Value <> "" _
-            And IsDate(ws.Cells(currentRow, "F").Value) Then
-
-            requestedDate = _
-                Format( _
-                    ws.Cells(currentRow, "F").Value, _
-                    "dd.MM.yyyy" _
-                )
-
-        Else
-
-            requestedDate = ""
-
-        End If
-
-
-        ' ---------------------------------------------------------------------
         ' Clear previous automation results
         '
         ' Column H is intentionally not modified.
@@ -232,6 +193,49 @@ Public Sub UpdateRequestedDeliveryDates()
         End If
 
 
+        ' ---------------------------------------------------------------------
+        ' Validate Quantity input
+        '
+        ' Do not continue to SAP if Excel Qty is not numeric.
+        ' ---------------------------------------------------------------------
+
+        If Not IsNumeric(ws.Cells(currentRow, "E").Value) Then
+
+            ws.Cells(currentRow, "K").Value = _
+                "Not Processed"
+
+            ws.Cells(currentRow, "L").Value = _
+                "SKIP: Invalid Qty"
+
+            GoTo NextRequest
+
+        End If
+
+
+        expectedQty = _
+            CDbl(ws.Cells(currentRow, "E").Value)
+
+
+        ' ---------------------------------------------------------------------
+        ' Validate and format requested delivery date
+        ' ---------------------------------------------------------------------
+
+        If ws.Cells(currentRow, "F").Value <> "" _
+            And IsDate(ws.Cells(currentRow, "F").Value) Then
+
+            requestedDate = _
+                Format( _
+                    ws.Cells(currentRow, "F").Value, _
+                    "dd.MM.yyyy" _
+                )
+
+        Else
+
+            requestedDate = ""
+
+        End If
+
+
         If requestedDate = "" Then
 
             ws.Cells(currentRow, "K").Value = _
@@ -259,6 +263,9 @@ Public Sub UpdateRequestedDeliveryDates()
 
         With SapSession
 
+
+            ' Open VA02.
+
             .findById( _
                 "wnd[0]/tbar[0]/okcd" _
             ).Text = "/nVA02"
@@ -266,17 +273,23 @@ Public Sub UpdateRequestedDeliveryDates()
             .findById("wnd[0]").sendVKey 0
 
 
+            ' Enter Customer PO.
+
             .findById( _
                 "wnd[0]/usr/txtRV45S-BSTNK" _
             ).Text = customerPO
 
+
+            ' Search for corresponding Sales Order.
 
             .findById( _
                 "wnd[0]/usr/btnBT_SUCH" _
             ).Press
 
 
+            ' -----------------------------------------------------------------
             ' Handle optional SAP selection / confirmation dialogs.
+            ' -----------------------------------------------------------------
 
             On Error Resume Next
 
@@ -288,12 +301,14 @@ Public Sub UpdateRequestedDeliveryDates()
                 "wnd[1]/tbar[0]/btn[0]" _
             ).Press
 
+            Err.Clear
+
             On Error GoTo RequestError
 
 
             ' =================================================================
             ' STEP 2
-            ' Navigate to requested line item
+            ' Navigate to requested Sales Order line item
             ' =================================================================
 
             .findById( _
@@ -305,6 +320,8 @@ Public Sub UpdateRequestedDeliveryDates()
             ).Press
 
 
+            ' Enter Line Item.
+
             .findById( _
                 "wnd[1]/usr/txtRV45A-POSNR" _
             ).Text = lineItem
@@ -314,6 +331,8 @@ Public Sub UpdateRequestedDeliveryDates()
                 "wnd[1]/usr/txtRV45A-POSNR" _
             ).CaretPosition = Len(lineItem)
 
+
+            ' Confirm Line Item.
 
             .findById( _
                 "wnd[1]/tbar[0]/btn[0]" _
@@ -382,34 +401,39 @@ Public Sub UpdateRequestedDeliveryDates()
             )
 
 
-        ' ---------------------------------------------------------------------
-        ' Material validation
+        ' =====================================================================
+        ' STEP 5
+        ' Validate Material Number
         '
         ' Leading zeros and spaces are removed before comparison.
         '
-        ' The original implementation also allowed an included-within
-        ' comparison to accommodate SAP Material Number formatting.
-        ' ---------------------------------------------------------------------
+        ' Exact comparison is used after normalization to prevent
+        ' partial Material Numbers from being incorrectly accepted.
+        '
+        ' Example:
+        '
+        '   SAP   : 000000A2011150X046
+        '   Excel : A2011150X046
+        '
+        ' After normalization:
+        '
+        '   SAP   : A2011150X046
+        '   Excel : A2011150X046
+        '
+        ' Result: Match
+        ' =====================================================================
 
         materialMatches = _
-            (InStr( _
-                1, _
+            (StrComp( _
                 normalizedSapMaterial, _
                 normalizedExcelMaterial, _
                 vbTextCompare _
-            ) > 0) _
-            Or _
-            (InStr( _
-                1, _
-                normalizedExcelMaterial, _
-                normalizedSapMaterial, _
-                vbTextCompare _
-            ) > 0)
+            ) = 0)
 
 
         ' =====================================================================
-        ' STEP 5
-        ' Validate quantity
+        ' STEP 6
+        ' Validate Quantity
         ' =====================================================================
 
         quantityMatches = _
@@ -417,7 +441,7 @@ Public Sub UpdateRequestedDeliveryDates()
 
 
         ' =====================================================================
-        ' STEP 6
+        ' STEP 7
         ' Validation decision
         ' =====================================================================
 
@@ -465,7 +489,7 @@ Public Sub UpdateRequestedDeliveryDates()
 
 
         ' =====================================================================
-        ' STEP 7
+        ' STEP 8
         ' Update Requested Delivery Date
         ' =====================================================================
 
@@ -490,6 +514,8 @@ Public Sub UpdateRequestedDeliveryDates()
 
             Err.Clear
 
+            On Error GoTo RequestError
+
             GoTo NextRequest
 
         End If
@@ -504,7 +530,7 @@ Public Sub UpdateRequestedDeliveryDates()
 
 
         ' =====================================================================
-        ' STEP 8
+        ' STEP 9
         ' Save Sales Order
         ' =====================================================================
 
@@ -513,13 +539,17 @@ Public Sub UpdateRequestedDeliveryDates()
         ).sendVKey 11
 
 
+        ' ---------------------------------------------------------------------
         ' Handle optional SAP confirmation dialog.
+        ' ---------------------------------------------------------------------
 
         On Error Resume Next
 
         SapSession.findById( _
             "wnd[1]/tbar[0]/btn[7]" _
         ).Press
+
+        Err.Clear
 
         On Error GoTo RequestError
 
@@ -598,12 +628,16 @@ Private Function GetTopRowMaterial( _
     On Error Resume Next
 
 
+    ' Primary Material field.
+
     valueText = _
         grid.Parent.findById( _
             grid.ID & _
             "/ctxtRV45A-MATNR[1,0]" _
         ).Text
 
+
+    ' Alternative Material field.
 
     If Err.Number <> 0 _
         Or valueText = "" Then
@@ -618,6 +652,8 @@ Private Function GetTopRowMaterial( _
 
     End If
 
+
+    ' Alternative text field.
 
     If Err.Number <> 0 _
         Or valueText = "" Then
@@ -656,12 +692,16 @@ Private Function GetTopRowQuantity( _
     On Error Resume Next
 
 
+    ' Primary Quantity field.
+
     valueText = _
         grid.Parent.findById( _
             grid.ID & _
             "/txtRV45A-KWMENG[2,0]" _
         ).Text
 
+
+    ' Alternative Quantity field.
 
     If Err.Number <> 0 _
         Or valueText = "" Then
@@ -676,6 +716,8 @@ Private Function GetTopRowQuantity( _
 
     End If
 
+
+    ' Alternative text field.
 
     If Err.Number <> 0 _
         Or valueText = "" Then
@@ -702,7 +744,7 @@ End Function
 
 ' =============================================================================
 ' Helper:
-' Normalize Material / Part Number
+' Normalize Material / Part Number before comparison
 ' =============================================================================
 
 Private Function NormalizeMaterialNumber( _
@@ -730,7 +772,17 @@ Private Function NormalizeMaterialNumber( _
         )
 
 
+    ' -------------------------------------------------------------------------
     ' Remove leading zeros commonly displayed by SAP.
+    '
+    ' Example:
+    '
+    '   000000A2011150X046
+    '
+    ' becomes:
+    '
+    '   A2011150X046
+    ' -------------------------------------------------------------------------
 
     Do While _
         Len(normalizedValue) > 1 _
@@ -792,7 +844,6 @@ Private Function NormalizeQuantityToDouble( _
         ElseIf currentCharacter = "." _
             Or currentCharacter = "," _
             Or currentCharacter = decimalSeparator Then
-
 
             If InStr( _
                 numericValue, _
