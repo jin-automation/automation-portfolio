@@ -113,3 +113,165 @@ Skip Update      Change Requested
              |
              v
       Process Next Line Item
+
+
+---
+
+## Safety & Validation
+
+One of the most important considerations when designing this automation was preventing incorrect updates in SAP.
+
+The automation therefore does **not** simply locate a line item and change its date.
+
+Before making any change, it verifies two important values:
+
+- **Material / Part Number**
+- **Order Quantity**
+
+The delivery requested date is changed only when both SAP values match the expected values provided in Excel.
+
+If either value does not match, the automation skips the update and records the reason for review.
+
+Examples of recorded statuses include:
+
+```text
+OK
+MISMATCH: PN
+MISMATCH: Qty
+MISMATCH: PN & Qty
+SKIP: Missing data
+NO DATE
+DATE WRITE FAIL
+ERROR
+```
+
+This validation mechanism was designed to reduce the risk of modifying the wrong Sales Order line item during high-volume processing.
+
+---
+
+## Business Impact
+
+### Before Automation
+
+- Large requests could contain **100+ line items**.
+- Processing 100+ line items manually could take **more than 40 minutes**.
+- Each item required repetitive SAP navigation, verification and data entry.
+- The reseller's PO number often had to be used to locate the corresponding internal Sales Order.
+- Repetitive manual processing increased the possibility of human error.
+- Large delivery-date-change requests required significant attention and manual effort.
+
+### After Automation
+
+- The same type of high-volume request could typically be processed in **approximately 10 minutes**.
+- More than 100 line items could be processed automatically after starting the automation.
+- Minimal user intervention was required while the automation was running.
+- Material Number and Quantity validation helped prevent incorrect SAP updates.
+- Exceptions and mismatches were automatically recorded for manual review.
+- Large-volume reseller requests became significantly easier and faster to manage.
+
+---
+
+## Before vs After
+
+| Process | Before Automation | After Automation |
+|---|---|---|
+| 100+ line-item request | 40+ minutes | ~10 minutes |
+| Sales Order search | Manual | Automated using Customer PO |
+| Line-item navigation | Manual | Automated |
+| Material verification | Manual | Automated |
+| Quantity verification | Manual | Automated |
+| Delivery date update | Manual | Automated after validation |
+| Error checking | User dependent | Built-in validation |
+| Exception tracking | Manual | Automatically logged in Excel |
+| User intervention | Continuous | Minimal after execution |
+
+---
+
+## Excel Input & Processing Log
+
+The Excel worksheet acts as both the input source and processing log.
+
+Typical fields include:
+
+| Field | Purpose |
+|---|---|
+| Customer PO | Used to locate the Sales Order |
+| Line Item | Identifies the requested Sales Order line |
+| Material / Part Number | Used for validation |
+| Quantity | Used for validation |
+| Requested Delivery Date | New date to be updated |
+| PN / Qty Match | Indicates validation result |
+| Status | Records processing result |
+| SAP Material | Captures SAP value for verification |
+| SAP Quantity | Captures SAP value for verification |
+
+This provides visibility into which items were successfully processed and which items require manual review.
+
+---
+
+## Technologies Used
+
+- **SAP ERP / ECC**
+- **SAP VA02**
+- **SAP GUI Scripting**
+- **Microsoft Excel**
+- **Excel VBA / Macros**
+- **Business Process Automation**
+- **Order Management**
+
+---
+
+## Key VBA Concepts Used
+
+The automation demonstrates practical use of:
+
+- SAP GUI Scripting through VBA
+- Excel-to-SAP integration
+- Automated SAP transaction navigation
+- Dynamic processing of multiple Excel rows
+- Material Number normalization
+- Quantity normalization and comparison
+- Conditional SAP updates
+- Error handling
+- Exception logging
+- Automated status reporting
+
+---
+
+## Key Design Principle
+
+The objective was not simply to make the process faster.
+
+The automation was designed around the principle:
+
+> **Validate first, update second.**
+
+A Sales Order line is updated only after the automation confirms that the Material Number and Order Quantity in SAP match the expected request.
+
+This combines **process efficiency with operational control**, which is particularly important when automating changes to live ERP transactions.
+
+---
+
+## Result
+
+This project transformed a repetitive Sales Order maintenance task from a manual, high-attention process into a largely automated workflow.
+
+**100+ Line Items | 40+ Minutes → ~10 Minutes | SAP ECC + Excel VBA | Built-in Validation**
+
+The automation allowed high-volume delivery date change requests to be handled more efficiently while reducing repetitive manual work and the risk of incorrect updates.
+
+---
+
+## Source Code
+
+A sanitized portfolio version of the VBA source code will be included in this repository.
+
+All company-specific, customer-specific and confidential information will be removed or generalized before publication.
+
+---
+
+## Note
+
+This repository is intended to demonstrate the automation approach, business problem-solving process and technical implementation.
+
+No confidential company, customer, pricing, order or production SAP data is included.
