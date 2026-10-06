@@ -2,7 +2,7 @@
 
 **SAP ERP/ECC | Excel VBA | SAP GUI Scripting | Order Management**
 
-Automated high-volume sales order delivery date changes in SAP ECC, reducing a **40+ minute repetitive manual task to ~10 minutes using two automation methods**—by Line Item and by Part Number—with validation controls to improve processing accuracy.
+Automated high-volume sales order delivery date changes in SAP ECC, reducing a **40+ minute repetitive manual task to ~10 minutes using 2 Automation Methods**—by Line Item and by Part Number—with validation controls to improve processing accuracy.
 
 ---
 
