@@ -761,4 +761,3 @@ Private Function NormalizeQuantityToDouble( _
     End If
 
 End Function
-
