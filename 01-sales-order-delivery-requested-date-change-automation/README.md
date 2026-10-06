@@ -62,7 +62,7 @@ The Excel worksheet clearly separates user-provided request data from the SAP va
 
 > All data shown in this demo is fictional and used for portfolio purposes only.
 
-[View Demo Workbook](demo/sales_order_delivery_date_automation_demo.xlsx)
+[View Demo Workbook](demo/SAP_delivery_date_automation_demo.xlsx)
 
 ---
 
@@ -70,6 +70,6 @@ The Excel worksheet clearly separates user-provided request data from the SAP va
 
 `SAP ERP/ECC` · `SAP VA02` · `SAP GUI Scripting` · `Excel VBA` · `Order Management`
 
-[`View Sanitized VBA Source Code`](src/sales_order_delivery_date_automation.bas)
+[View VBA Source Code](src/SAP_delivery_date_automation_demo.bas)
 
 > All company, customer and production SAP information has been removed or replaced with dummy data.
