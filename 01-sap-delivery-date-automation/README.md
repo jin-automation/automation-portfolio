@@ -2,7 +2,7 @@
 
 **SAP ERP/ECC | Excel VBA | SAP GUI Scripting | Order Management**
 
-Automated high-volume sales order delivery date changes in SAP ECC, reducing a **40+ minute repetitive manual task to ~10 minutes** while adding validation controls to reduce update errors.
+Automated high-volume sales order delivery date changes in SAP ECC, reducing a **40+ minute repetitive manual task to ~10 minutes using 2 Atomation Methods**—by Line Item and by Part Number—with validation controls to reduce update errors.
 
 ---
 
@@ -22,16 +22,29 @@ This created unnecessary manual workload and increased the risk of updating the 
 
 ## Solution
 
-I developed an **Excel VBA automation using SAP GUI Scripting** to process delivery date change requests.
+I developed two Excel VBA automation methods using SAP GUI Scripting to process high-volume delivery date change requests.
+
+### Method 1 — Search by Line Item
 
 The automation:
 
-1. Reads the customer request from Excel.
+1. Reads the Customer PO and Line Item from Excel.
 2. Locates the requested line item in SAP ECC.
-3. Retrieves the SAP **Part Number** and **Quantity**.
-4. Compares them with the request data.
-5. Updates the delivery date **only when both values match**.
-6. Records the result in Excel and continues to the next request.
+3. Retrieves the SAP Part Number and Quantity.
+4. Validates them against the request data.
+5. Updates the delivery date only when both values match.
+6. Records the processing result in Excel.
+
+### Method 2 — Search by Part Number
+
+For requests where the Part Number is used as the reference, the automation:
+
+1. Reads the Customer PO and Part Number from Excel.
+2. Locates the corresponding material in SAP ECC.
+3. Identifies the relevant item.
+4. Updates the requested delivery date.
+5. Records the processing result in Excel.
+
 
 ### Safety & Validation
 
