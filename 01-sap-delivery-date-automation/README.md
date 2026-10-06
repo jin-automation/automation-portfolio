@@ -22,29 +22,30 @@ I developed two Excel VBA automation methods using SAP GUI Scripting to process 
 
 For requests containing a Line Item reference, the automation:
 
-1. Reads the Customer PO, Line Item, Part Number, Quantity, and New Delivery Date from Excel.
-2. Locates the requested Line Item in SAP ECC.
+1. Reads the Customer PO, **Line Item**, Part Number, Quantity, and New Delivery Date from Excel.
+2. Locates the requested **Line Item** in SAP ECC.
 3. Retrieves the SAP Part Number and Quantity.
 4. Validates the SAP values against the request.
 5. Updates the delivery date only when both Part Number and Quantity match.
 6. Records the processing result in Excel.
+
+
+
+### Method 2 — By Part Number
+
+For requests using the Part Number as the item reference, the automation:
+
+1. Reads the Customer PO, **Part Number**, and New Delivery Date from Excel.
+2. Locates the corresponding **Part Number** / Material in SAP ECC.
+3. Validates the SAP values against the request.
+4. Updates the delivery date only when both Part Number and Quantity match.
+5. Records the processing result in Excel.
 
 **Safety control:** Part No. and Qty must match SAP.
 
 > **Match → Delivery date updated**  
 > **Mismatch → No update**
 
-### Method 2 — By Part Number
-
-For requests using the Part Number as the item reference, the automation:
-
-1. Reads the Customer PO, Part Number, and New Delivery Date from Excel.
-2. Locates the corresponding Part Number / Material in SAP ECC.
-3. Positions the relevant item for processing.
-4. Updates the requested delivery date.
-5. Records the processing result in Excel.
-
-A fallback scan is used to locate the matching material if the item is not positioned as expected.
 
 ---
 
