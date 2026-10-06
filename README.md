@@ -2,10 +2,9 @@
 
 ## About Me
 
-Business operations professional with extensive experience in
-Order Management and Customer Operations.
+Business operations professional with extensive experience in **Order Management and Customer Operations**, with a focus on using technology to improve operational efficiency.
 
-I have developed practical automation solutions using:
+I develop practical automation solutions using:
 
 - SAP ERP / ECC
 - Excel VBA & Macros
@@ -15,13 +14,23 @@ I have developed practical automation solutions using:
 
 ## Portfolio Focus
 
-My automation projects focus on reducing repetitive manual tasks
-in Order Management processes, improving efficiency and reducing
-manual data entry.
+My projects focus on automating repetitive business processes, reducing manual work, improving accuracy, and creating more efficient Order Management workflows.
+
+---
 
 ## Projects
 
-Projects will include:
+### 01. SAP Delivery Date Automation
+
+**SAP ERP/ECC | Excel VBA | SAP GUI Scripting | Order Management**
+
+Automated high-volume delivery date changes in SAP ECC, reducing a **40+ minute repetitive manual task to ~10 minutes** while adding Part No. and Quantity validation to reduce update errors.
+
+[View Project](01-sap-delivery-date-automation)
+
+---
+
+## Upcoming Projects
 
 - SAP Part Availability Automation
 - SAP Price Check Automation
@@ -29,4 +38,4 @@ Projects will include:
 - Order Tracking Automation
 - Customs Status Automation
 
-More projects will be added progressively.
+More automation projects will be added progressively.
