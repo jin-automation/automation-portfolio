@@ -2,21 +2,15 @@
 
 **SAP ERP/ECC | Excel VBA | SAP GUI Scripting | Order Management**
 
-Automated high-volume sales order delivery date changes in SAP ECC, reducing a **40+ minute repetitive manual task to ~10 minutes using 2 Atomation Methods**—by Line Item and by Part Number—with validation controls to reduce update errors.
+Automated high-volume sales order delivery date changes in SAP ECC, reducing a **40+ minute repetitive manual task to ~10 minutes using two automation methods**—by Line Item and by Part Number—with validation controls to improve processing accuracy.
 
 ---
 
 ## Business Problem
 
-Delivery date change requests could involve **100+ line items**, requiring each item to be manually checked and updated in SAP.
+Delivery date change requests could involve **100+ line items**, requiring each item to be manually located, checked, and updated in SAP.
 
-The manual process took **more than 40 minutes** for a large request and involved repetitive verification of:
-
-- Part Number
-- Quantity
-- Requested Delivery Date
-
-This created unnecessary manual workload and increased the risk of updating the wrong item.
+The manual process took **more than 40 minutes** for a large request and involved repetitive SAP processing, increasing workload and the risk of incorrect updates.
 
 ---
 
@@ -24,35 +18,33 @@ This created unnecessary manual workload and increased the risk of updating the 
 
 I developed two Excel VBA automation methods using SAP GUI Scripting to process high-volume delivery date change requests.
 
-### Method 1 — Search by Line Item
+### Method 1 — By Line Item
 
-The automation:
+For requests containing a Line Item reference, the automation:
 
-1. Reads the Customer PO and Line Item from Excel.
-2. Locates the requested line item in SAP ECC.
+1. Reads the Customer PO, Line Item, Part Number, Quantity, and New Delivery Date from Excel.
+2. Locates the requested Line Item in SAP ECC.
 3. Retrieves the SAP Part Number and Quantity.
-4. Validates them against the request data.
-5. Updates the delivery date only when both values match.
+4. Validates the SAP values against the request.
+5. Updates the delivery date only when both Part Number and Quantity match.
 6. Records the processing result in Excel.
 
-### Method 2 — Search by Part Number
+**Safety control:** Part No. and Qty must match SAP.
 
-For requests where the Part Number is used as the reference, the automation:
+> **Match → Delivery date updated**  
+> **Mismatch → No update**
 
-1. Reads the Customer PO and Part Number from Excel.
-2. Locates the corresponding material in SAP ECC.
-3. Identifies the relevant item.
+### Method 2 — By Part Number
+
+For requests using the Part Number as the item reference, the automation:
+
+1. Reads the Customer PO, Part Number, and New Delivery Date from Excel.
+2. Locates the corresponding Part Number / Material in SAP ECC.
+3. Positions the relevant item for processing.
 4. Updates the requested delivery date.
 5. Records the processing result in Excel.
 
-
-### Safety & Validation
-
-> **Part No. and Qty must match SAP.**  
-> **Match → Delivery date updated.**  
-> **Mismatch → No update.**
-
-This validation prevents the automation from changing the delivery date when the SAP data does not match the request.
+A fallback scan is used to locate the matching material if the item is not positioned as expected.
 
 ---
 
@@ -62,23 +54,30 @@ This validation prevents the automation from changing the delivery date when the
 |---|---|---|
 | Processing | Manual SAP updates | Automated processing |
 | Large request | 40+ minutes | ~10 minutes |
-| Validation | Manual checking | Automated Part No. & Qty validation |
-| Error control | Dependent on manual verification | Mismatch automatically stops update |
-| Result tracking | Manual | Status recorded for each line |
+| Processing options | Manual item lookup | Line Item or Part Number automation |
+| Validation | Manual checking | Automated PN/Qty validation for Line Item method |
+| Error control | Dependent on manual verification | Validation prevents mismatched Line Item updates |
+| Result tracking | Manual | Processing status recorded in Excel |
 
 ---
 
 ## Excel Demo
 
-The demo below uses fictional data to show how customer requests, SAP validation, and processing results are presented.
+The demo below uses fictional data to illustrate the Line Item method, including SAP Part Number and Quantity validation.
 
 ![SAP Delivery Date Automation Demo](images/excel-demo.png)
 
-### Demo Files
+### Demo Workbook
 
 [View Demo Workbook](demo/SAP_delivery_date_automation_demo.xlsx)
 
-[View VBA Source Code](src/SAP_delivery_date_automation_demo.bas)
+### VBA Source Code
+
+**Method 1 — By Line Item**  
+[View Line Item VBA Source](src/SAP_delivery_date_by_line_item.bas)
+
+**Method 2 — By Part Number**  
+[View Part Number VBA Source](src/SAP_delivery_date_by_part_number.bas)
 
 ---
 
