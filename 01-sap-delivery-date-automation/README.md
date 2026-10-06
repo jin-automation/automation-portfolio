@@ -4,6 +4,7 @@
 
 Automated high-volume sales order delivery date changes in SAP ECC, reducing a **40+ minute repetitive manual task to ~10 minutes using 2 Automation Methods**—by Line Item and by Part Number—with validation controls to improve processing accuracy.
 
+
 ---
 
 ## Business Problem
@@ -12,11 +13,12 @@ Delivery date change requests could involve **100+ line items**, requiring each 
 
 The manual process took **more than 40 minutes** for a large request and involved repetitive SAP processing, increasing workload and the risk of incorrect updates.
 
+
 ---
 
 ## Solution
 
-I developed two Excel VBA automation methods using SAP GUI Scripting to process high-volume delivery date change requests.
+I developed **two Excel VBA automation** methods using SAP GUI Scripting to process high-volume delivery date change requests.
 
 ### Method 1 — By Line Item
 
