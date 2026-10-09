@@ -64,15 +64,15 @@ The demo uses fictional Sales Order and Customer PO data to illustrate the autom
 
 **Sales Order → SAP VA03 → Customer PO → Excel Update**
 
-![SAP Customer PO Lookup Demo](images/excel-demo.png)
+![SAP Customer PO Lookup Demo](./images/excel-demo.png)
 
 ### Demo Workbook
 
-[View Demo Workbook](demo/SAP_customer_po_lookup_demo.xlsx)
+[View Demo Workbook](./demo/SAP_customer_po_lookup_demo.xlsx)
 
 ### VBA Source Code
 
-[View VBA Source](src/SAP_customer_po_lookup.bas)
+[View VBA Source](./src/SAP_customer_po_lookup.bas)
 
 ---
 
