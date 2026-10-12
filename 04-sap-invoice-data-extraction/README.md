@@ -2,27 +2,34 @@
 
 **SAP ERP/ECC | Excel VBA | SAP GUI Scripting | Order Management**
 
-Automated invoice data retrieval from SAP ECC using Delivery Numbers, eliminating repetitive manual invoice lookups and Excel updates.
+**Automated invoice data retrieval for multiple Delivery Numbers in SAP ECC**, tracing related invoices through SAP Document Flow and updating the results directly in Excel.
 
 ---
 
 ## Business Problem
 
-Invoice details had to be manually traced from individual Delivery Numbers in SAP.
+Invoice details had to be manually traced from individual Delivery Numbers through SAP Document Flow and then copied into Excel.
 
-For larger delivery lists, repeatedly locating the related invoice and copying the information into Excel was time-consuming.
+For larger delivery lists, repeating this process for each record required multiple SAP lookups and manual Excel updates.
 
 ---
 
 ## Solution
 
-I developed an **Excel VBA automation using SAP GUI Scripting** that:
+I developed an Excel VBA automation using SAP GUI Scripting that:
 
 1. Reads Delivery Numbers from Excel.
-2. Locates the related Invoice through SAP Document Flow.
-3. Retrieves **Invoice Number, Invoice Date, and Net Value**.
-4. Updates the results automatically in Excel.
-5. Continues through multiple delivery records and worksheets.
+2. Opens each Delivery in SAP using **VL03N**.
+3. Navigates through **SAP Document Flow** to locate the related Invoice.
+4. Retrieves the **Invoice Number, Invoice Date, and Net Value**.
+5. Updates the results directly in Excel.
+6. Automatically continues through multiple delivery records.
+
+### Information Retrieved
+
+- **Invoice Number**
+- **Invoice Date**
+- **Net Value**
 
 ### Data Flow
 
@@ -33,8 +40,8 @@ I developed an **Excel VBA automation using SAP GUI Scripting** that:
 ## Business Impact
 
 - Reduced repetitive SAP invoice lookups.
-- Automated processing of multiple Delivery Numbers.
-- Reduced manual Excel entry.
+- Reduced manual tracing of invoices from Delivery Numbers.
+- Reduced manual Excel data entry.
 
 ---
 
@@ -45,6 +52,12 @@ I developed an **Excel VBA automation using SAP GUI Scripting** that:
 [View Demo Workbook](./demo/SAP_invoice_data_extraction_demo.xlsx)
 
 [View VBA Source Code](./src/SAP_invoice_data_extraction.bas)
+
+---
+
+## Technologies
+
+**SAP ERP/ECC | SAP GUI Scripting | Excel VBA | Order Management | Process Automation**
 
 ---
 
