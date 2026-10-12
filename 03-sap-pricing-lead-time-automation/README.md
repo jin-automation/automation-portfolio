@@ -2,7 +2,7 @@
 
 **SAP ERP/ECC | Excel VBA | SAP GUI Scripting | Order Management**
 
-Automated pricing and lead time checks for multiple materials in SAP ECC, consolidating key pricing and delivery information directly into Excel.
+**Automated pricing and lead time checks for multiple materials in SAP ECC**, consolidating key pricing and delivery information directly into Excel.
 
 ---
 
