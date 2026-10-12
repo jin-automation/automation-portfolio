@@ -2,7 +2,7 @@
 
 **Excel VBA | Order Management | Logistics Automation**
 
-Automated order tracking by matching Customs Clearance and POD data with internal order lists and updating delivery status in Excel.
+**Automated order tracking across multiple Excel files** by by matching Customs Clearance and POD (Proof Of Delivery) data with internal order lists and updating delivery status in Excel.
 
 ---
 
