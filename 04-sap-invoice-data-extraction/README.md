@@ -40,7 +40,7 @@ I developed an **Excel VBA automation using SAP GUI Scripting** that:
 
 ## Demo
 
-![SAP Invoice Data Extraction Demo](./images/excel-demo.png)
+![SAP Invoice Data Extraction Demo](./image/excel-demo.png)
 
 [View Demo Workbook](./demo/SAP_invoice_data_extraction_demo.xlsx)
 
