@@ -2,7 +2,7 @@
 
 **Excel VBA | Order Management | Logistics Automation**
 
-**Automated order tracking across multiple Excel files** by by matching Customs Clearance and POD (Proof Of Delivery) data with internal order lists and updating delivery status in Excel.
+**Automated order tracking across multiple Excel files** by matching Customs Clearance and POD (Proof of Delivery) data with internal order lists and updating order and delivery information in Excel.
 
 ---
 
@@ -17,14 +17,15 @@ Order status required manual comparison across multiple Excel files, making larg
 I developed two Excel VBA automations:
 
 ### 1. Customs Clearance Matching
+
 Matches Sales Orders against the Customs Clearance List and **identifies matching orders automatically**.
 
-
 ### 2. POD Delivery Confirmation
+
 Matches POD data with internal Order Numbers and automatically updates **POD Date and Delivery Status**.
 
-
 ---
+
 ## Data Flow
 
 **Customs Clearance / POD Data → Order Matching → Status Update**
@@ -34,7 +35,7 @@ Matches POD data with internal Order Numbers and automatically updates **POD Dat
 ## Business Impact
 
 - Reduced repetitive manual file comparison.
-- Automated order and delivery status updates.
+- Automated order matching and delivery status updates.
 - Reduced manual Excel entry.
 
 ---
@@ -55,4 +56,4 @@ Matches POD data with internal Order Numbers and automatically updates **POD Dat
 
 ---
 
-*Portfolio version — company, customer, order, customs clearance, and delivery data have been replaced with fictional examples.*
+*Portfolio version — company, customer, order, customs clearance, POD, and delivery data have been replaced with fictional examples.*
