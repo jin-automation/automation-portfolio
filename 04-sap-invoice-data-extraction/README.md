@@ -2,7 +2,7 @@
 
 **SAP ERP/ECC | Excel VBA | SAP GUI Scripting | Order Management**
 
-**Automated invoice data retrieval for multiple Delivery Numbers in SAP ECC**, tracing related invoices through SAP Document Flow and updating the results directly in Excel.
+Automated invoice data retrieval for multiple Delivery Numbers in SAP ECC, reducing a **20–30 minute daily process to under 5 minutes**.
 
 ---
 
@@ -23,7 +23,7 @@ I developed an Excel VBA automation using SAP GUI Scripting that:
 3. Navigates through **SAP Document Flow** to locate the related Invoice.
 4. Retrieves the **Invoice Number, Invoice Date, and Net Value**.
 5. Updates the results directly in Excel.
-6. Automatically continues through multiple delivery records.
+6. Automatically continues through the remaining Delivery Numbers.
 
 ### Information Retrieved
 
@@ -39,9 +39,9 @@ I developed an Excel VBA automation using SAP GUI Scripting that:
 
 ## Business Impact
 
-- Reduced repetitive SAP invoice lookups.
-- Reduced manual tracing of invoices from Delivery Numbers.
-- Reduced manual Excel data entry.
+- Reduced daily invoice processing time from **20–30 minutes to under 5 minutes**.
+- Automated repetitive invoice tracing through SAP Document Flow.
+- Reduced manual SAP lookups and Excel data entry.
 
 ---
 
