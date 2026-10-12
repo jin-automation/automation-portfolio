@@ -2,32 +2,30 @@
 
 **Excel VBA | Order Management | Logistics Automation**
 
-Automated order and delivery tracking by matching Customs Clearance List and POD (Proof Of Delivery) data against internal order lists and updating order status automatically in Excel.
+Automated order tracking by matching Customs Clearance and POD data with internal order lists and updating delivery status in Excel.
 
 ---
 
 ## Business Problem
 
-Order status required manual comparison between internal order lists, Customs Clearance lists, and POD data.
-
-For large order volumes, this was repetitive and time-consuming.
+Order status required manual comparison across multiple Excel files, making large order lists time-consuming to track and update.
 
 ---
 
 ## Solution
 
-I developed Excel VBA automations for two key processes:
+I developed two Excel VBA automations:
 
-### Customs Clearance List Matching
-- Matches Sales Orders against the Customs Clearance List.
-- Identifies matching orders automatically.
-- Updates relevant order information and status.
+### 1. Customs Clearance Matching
+Matches Sales Orders against the Customs Clearance List and **identifies matching orders automatically**.
 
-### POD Delivery Data Matching
-- Matches POD data against internal Order Numbers.
-- Updates completed orders with **Status and POD Date** automatically.
 
-### Data Flow
+### 2. POD Delivery Confirmation
+Matches POD data with internal Order Numbers and automatically updates **POD Date and Delivery Status**.
+
+
+---
+## Data Flow
 
 **Customs Clearance / POD Data → Order Matching → Status Update**
 
@@ -43,17 +41,17 @@ I developed Excel VBA automations for two key processes:
 
 ## Demo
 
-![Order Tracking Automation Demo](./image/customs-clearance-demo.png)
+### Customs Clearance Matching
 
-![Order Tracking Automation Demo](./image/pod-delivery-demo.png)
+![Customs Clearance Matching Demo](./image/customs-clearance-demo.png)
 
-[View Customs Clearance Matching Demo Workbook](./demo/Customs_clearance_matching_demo.xlsx)
+[View Demo Workbook](./demo/Customs_clearance_matching_demo.xlsx) | [View Source Code](./src/Customs_clearance_matching.bas)
 
-[View POD Delivery Matching Demo Workbook](./demo/POD_delivery_confirmation_demo.xlsx)
+### POD Delivery Confirmation
 
-[View Customs Clearance Matching Code](./src/Customs_clearance_matching.bas)
+![POD Delivery Confirmation Demo](./image/pod-delivery-demo.png)
 
-[View POD Delivery Confirmation Code](./src/POD_delivery_confirmation.bas)
+[View Demo Workbook](./demo/POD_delivery_confirmation_demo.xlsx) | [View Source Code](./src/POD_delivery_confirmation.bas)
 
 ---
 
