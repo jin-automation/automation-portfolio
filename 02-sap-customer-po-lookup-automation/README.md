@@ -2,7 +2,7 @@
 
 **SAP ERP/ECC | Excel VBA | SAP GUI Scripting | Order Management**
 
-Automated Customer PO retrieval from SAP ECC using Sales Order numbers, reducing repetitive SAP lookups and manual Excel updates during high-volume month-end reconciliation.
+**Automated Customer PO retrieval from SAP ECC** using Sales Order numbers, reducing repetitive SAP lookups and manual Excel updates during high-volume month-end reconciliation.
 
 ---
 
