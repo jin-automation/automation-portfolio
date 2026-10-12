@@ -43,7 +43,9 @@ I developed Excel VBA automations for two key processes:
 
 ## Demo
 
-![Order Tracking Automation Demo](./images/excel-demo.png)
+![Order Tracking Automation Demo](./image/customs-clearance-demo.png)
+
+![Order Tracking Automation Demo](./image/pod-delivery-demo.png)
 
 [View Demo Workbook](./demo/Order_tracking_automation_demo.xlsx)
 
