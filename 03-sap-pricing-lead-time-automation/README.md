@@ -2,7 +2,7 @@
 
 **SAP ERP/ECC | Excel VBA | SAP GUI Scripting | Order Management**
 
-Automated SAP pricing and lead time checks for multiple materials, retrieving key pricing and delivery information directly into Excel for faster order processing and customer response.
+Automated pricing and lead time checks for multiple materials in SAP ECC, consolidating key pricing and delivery information directly into Excel.
 
 ---
 
@@ -19,7 +19,7 @@ When handling multiple materials, repeatedly checking **List Price, Net Price, D
 I developed an Excel VBA automation using SAP GUI Scripting that:
 
 1. Reads Material and Quantity information from Excel.
-2. Processes each material through SAP ECC.
+2. Checks each material in SAP ECC.
 3. Retrieves the relevant pricing and delivery information.
 4. Updates the results directly in Excel.
 5. Continues automatically through the remaining materials.
@@ -42,9 +42,9 @@ I developed an Excel VBA automation using SAP GUI Scripting that:
 ## Business Impact
 
 - Reduced repetitive SAP pricing and delivery checks.
-- Enabled multiple materials to be processed automatically.
 - Reduced manual Excel entry and consolidation.
-- Provided pricing and estimated delivery information in one consolidated view.
+- Consolidated pricing and estimated delivery information into a single Excel view.
+- Supported more efficient processing of multi-material requests.
 
 ---
 
