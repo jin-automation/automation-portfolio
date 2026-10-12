@@ -23,7 +23,7 @@ I developed Excel VBA automations for two key processes:
 - Identifies matching orders automatically.
 - Updates relevant order information and status.
 
-### POD Delivery Confirmation
+### POD Delivery Data Matching
 - Matches POD data against internal Order Numbers.
 - Updates completed orders with **Status and POD Date** automatically.
 
@@ -47,7 +47,9 @@ I developed Excel VBA automations for two key processes:
 
 ![Order Tracking Automation Demo](./image/pod-delivery-demo.png)
 
-[View Demo Workbook](./demo/Order_tracking_automation_demo.xlsx)
+[View Customs Clearance Matching Demo Workbook](./demo/Customs_clearance_matching_demo.xlsx)
+
+[View POD Delivery Matching Demo Workbook](./demo/POD_delivery_confirmation_demo.xlsx)
 
 [View Customs Clearance Matching Code](./src/Customs_clearance_matching.bas)
 
