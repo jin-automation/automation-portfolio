@@ -2,7 +2,7 @@
 
 **SAP ERP/ECC | Excel VBA | SAP GUI Scripting | Order Management**
 
-Automated high-volume SAP delivery date changes using two methods—by Line Item and by Part Number—reducing a **40+ minute manual process to ~10 minutes**.
+Automated high-volumes Sales Order delivery date change using **two methods**—**by Line Item** and **by Part Number**—reducing a **40+ minute manual process to ~10 minutes**.
 
 ---
 
